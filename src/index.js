@@ -2,6 +2,9 @@ import app from './app.js'
 import { sequelize } from './database/database.js'
 import { data } from './config.js'
 
+import './models/saving_day.model.js'
+import './models/user.model.js'
+
 const port = data.port
 
 const main = async () => {
