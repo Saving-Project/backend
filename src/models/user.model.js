@@ -1,6 +1,5 @@
 import { DataTypes } from 'sequelize'
 import { sequelize } from '../database/database.js'
-import { SavingDay } from './saving_day.model.js'
 
 export const User = sequelize.define('users', {
     id: {
@@ -61,6 +60,3 @@ export const User = sequelize.define('users', {
 }, {
     timestamps: false
 })
-
-User.hasMany(SavingDay, { foreignKey: 'userId' })
-SavingDay.belongsTo(User, { foreignKey: 'userId' })
