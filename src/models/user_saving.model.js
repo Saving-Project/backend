@@ -17,22 +17,9 @@ export const UserSaving = sequelize.define('user_savings', {
             key: 'id'
         }
     },
-    saving_plan_id: {
+    savings: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'saving_plans',
-            key: 'id'
-        }
-    },
-    saved: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
-    },
-    date: {
-        type: DataTypes.DATEONLY,
-        allowNull: false,
-        defaultValue: DataTypes.NOW
+        allowNull: false
     }
 }, {
     timestamps: false
