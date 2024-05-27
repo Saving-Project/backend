@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize'
 import { sequelize } from '../database/database.js'
 import { User } from './user.model.js'
-import { SavingPlan } from './saving_plan.model.js'
+import { SavingPlan } from './saving_day.model.js'
 
 export const UserSaving = sequelize.define('user_savings', {
     id: {
@@ -18,7 +18,7 @@ export const UserSaving = sequelize.define('user_savings', {
         }
     },
     savings: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.JSONB,
         allowNull: false
     }
 }, {
