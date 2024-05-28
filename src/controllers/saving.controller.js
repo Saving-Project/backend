@@ -1,6 +1,7 @@
 import { Op } from 'sequelize'
 import { SavingPlan } from '../models/saving_day.model.js'
 import { UserSaving } from '../models/user_saving.model.js'
+import { User } from '../models/user.model.js'
 
 export const createSavingPlan = async (req, res) => {
     const userId = req.user.id
@@ -85,7 +86,6 @@ export const updateSavingStatus = async (req, res) => {
         const currentDate = new Date()
 
         const index = savings.findIndex(d => d.saving_day_id === day)
-        console.log(index)
 
         if (index === -1) {
             return res.status(404).json({ message: 'Plan de ahorro no encontrado' })
@@ -105,9 +105,23 @@ export const updateSavingStatus = async (req, res) => {
                 }
             }
 
+            const savingDay = await SavingPlan.findOne({ where: { id: day } })
+            if (!savingDay) return res.status(404).json({ message: 'Monto del día de ahorro no encontrado' })
+            const amountToAdd = savingDay.amount
+            
+            const user = await User.findByPk(userId, {
+                attributes: { exclude: ['password'] }
+            })
+            console.log(user)
+            if (!user) return res.status(404).json({ message: 'Usuario no encontrado' })
+            user.saving += amountToAdd
+            
+            await user.save()
             await userSaving.update({ savings })
 
-            return res.status(200).json(savings)
+            return res.status(200).json({
+                savings
+            })
         } else {
             return res.status(500).json('No se pudo marcar el día como ahorrado')
         }
