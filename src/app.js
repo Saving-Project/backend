@@ -10,6 +10,6 @@ app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json())
 
-app.use('/api/user', userRoutes)
+app.use('/api', userRoutes)
 
 export default app

@@ -4,7 +4,6 @@ import bcrypt from 'bcryptjs'
 export const register = async (req, res) => {
     const {
         name,
-        last_name,
         email,
         password
     } = req.body
@@ -29,12 +28,16 @@ export const register = async (req, res) => {
         const pwdHash = await bcrypt.hash(password, 10)
         const newUser = await User.create({
             name,
-            last_name,
             email,
             password: pwdHash
         })
         res.status(200).json(newUser)
     } catch (error) {
-        console.log(error)
+        if (error.name === 'SequelizeValidationError') {
+            const errs = error.errors.map(err => err.message)
+            return res.status(400).json({ errors: errs})
+        } else {
+            return res.status(500).json(error)
+        }
     }
 }
