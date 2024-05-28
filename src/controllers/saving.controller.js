@@ -69,3 +69,49 @@ export const getSavingDays = async (req, res) => {
         return res.status(500).json(error)
     }
 }
+
+export const updateSavingStatus = async (req, res) => {
+    const userId = req.user.id
+    const { day } = req.body
+
+    try {
+        const userSaving = await UserSaving.findOne({
+            where: { user_id: userId }
+        })
+
+        if (!userSaving) return res.status(404).json({ message: 'Plan de ahorro no encontrado' })
+        
+        const savings = userSaving.savings
+        const currentDate = new Date()
+
+        const index = savings.findIndex(d => d.saving_day_id === day)
+        console.log(index)
+
+        if (index === -1) {
+            return res.status(404).json({ message: 'Plan de ahorro no encontrado' })
+        }
+        
+        if (savings[index].enabled && (new Date(savings[index].date).toDateString() === currentDate.toDateString())) {
+            savings[index].saved = true
+
+            if (index + 1 < savings.length) {
+                savings[index + 1].enabled = true
+            }
+
+            if (index + 2 < savings.length) {
+                const nextDate = new Date(savings[index + 1].date)
+                if (nextDate.toDateString() === currentDate.toDateString()) {
+                    savings[index +2].enabled = true
+                }
+            }
+
+            await userSaving.update({ savings })
+
+            return res.status(200).json(savings)
+        } else {
+            return res.status(500).json('No se pudo marcar el día como ahorrado')
+        }
+    } catch (error) {
+        return res.status(500).json(error)
+    }
+}
