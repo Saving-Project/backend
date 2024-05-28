@@ -1,3 +1,4 @@
+import { createAccessToken } from '../libs/jwt.js'
 import { User } from '../models/user.model.js'
 import bcrypt from 'bcryptjs'
 
@@ -39,5 +40,23 @@ export const register = async (req, res) => {
         } else {
             return res.status(500).json(error)
         }
+    }
+}
+
+export const login = async (req, res) => {
+    const { email, password } = req.body
+
+    try {
+        const user = await User.findOne({ where: { email } })
+        if (!user) return res.status(404).json({ message: 'Usuario no encontrado' })
+        
+        const isMatch = await bcrypt.compare(password, user.password)
+        if (!isMatch) return res.status(400).json({ message: 'Contraseña incorrecta' })
+        
+        const token = await createAccessToken(user)
+        res.setHeader('Authorization', token)
+        return res.status(200).json({user, token})
+    } catch (error) {
+        return res.status(500).json({ message: error.message })
     }
 }
