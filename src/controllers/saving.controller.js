@@ -37,6 +37,7 @@ export const createSavingPlan = async (req, res) => {
 
 export const getSavingDays = async (req, res) => {
     const userId = req.user.id
+    
     try {
         const userSaving = await UserSaving.findOne({
             where: { user_id: userId }
@@ -73,16 +74,19 @@ export const getSavingDays = async (req, res) => {
 
 export const updateSavingStatus = async (req, res) => {
     const userId = req.user.id
+    const id = req.params.id
     const { day } = req.body
 
     try {
         const userSaving = await UserSaving.findOne({
-            where: { user_id: userId }
+            where: { id, user_id: userId }
         })
+        console.log(`Ahorro encontrado ${userSaving.total_saving}`)
 
         if (!userSaving) return res.status(404).json({ message: 'Plan de ahorro no encontrado' })
         
         const savings = userSaving.savings
+        const parsedTotal = parseInt(userSaving.total_saving)
         const currentDate = new Date()
 
         const index = savings.findIndex(d => d.saving_day_id === day)
@@ -107,20 +111,15 @@ export const updateSavingStatus = async (req, res) => {
 
             const savingDay = await SavingPlan.findOne({ where: { id: day } })
             if (!savingDay) return res.status(404).json({ message: 'Monto del día de ahorro no encontrado' })
-            const amountToAdd = savingDay.amount
+            const newTotal = parsedTotal + savingDay.amount
             
-            const user = await User.findByPk(userId, {
-                attributes: { exclude: ['password'] }
+            const savingUpdated = await userSaving.update({
+                savings,
+                total_saving: newTotal
             })
-            console.log(user)
-            if (!user) return res.status(404).json({ message: 'Usuario no encontrado' })
-            user.saving += amountToAdd
-            
-            await user.save()
-            await userSaving.update({ savings })
 
             return res.status(200).json({
-                savings
+                savingUpdated
             })
         } else {
             return res.status(500).json('No se pudo marcar el día como ahorrado')

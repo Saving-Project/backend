@@ -20,6 +20,10 @@ export const UserSaving = sequelize.define('user_savings', {
     savings: {
         type: DataTypes.JSONB,
         allowNull: false
+    },
+    total_saving: {
+        type: DataTypes.BIGINT,
+        defaultValue: 0
     }
 }, {
     timestamps: false
@@ -27,6 +31,3 @@ export const UserSaving = sequelize.define('user_savings', {
 
 User.hasMany(UserSaving, { foreignKey: 'user_id' })
 UserSaving.belongsTo(User, { foreignKey: 'user_id' })
-
-SavingPlan.hasMany(UserSaving, { foreignKey: 'saving_plan_id' })
-UserSaving.belongsTo(SavingPlan, { foreignKey: 'saving_plan_id' })

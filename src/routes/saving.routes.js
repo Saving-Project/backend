@@ -10,6 +10,6 @@ const router = Router()
 
 router.post('/saving', authRequired, createSavingPlan)
 router.get('/saving', authRequired, getSavingDays)
-router.put('/saving', authRequired, updateSavingStatus)
+router.put('/saving/:id', authRequired, updateSavingStatus)
 
 export default router
