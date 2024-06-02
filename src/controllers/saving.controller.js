@@ -5,6 +5,7 @@ import { User } from '../models/user.model.js'
 
 export const createSavingPlan = async (req, res) => {
     const userId = req.user.id
+    const { description } = req.body
 
     try {
         const savingDays = await SavingPlan.findAll({
@@ -26,7 +27,8 @@ export const createSavingPlan = async (req, res) => {
 
         const userSaving = await UserSaving.create({
             user_id: userId,
-            savings: savings
+            savings: savings,
+            description
         })
 
         return res.status(200).json(userSaving)
@@ -81,7 +83,6 @@ export const updateSavingStatus = async (req, res) => {
         const userSaving = await UserSaving.findOne({
             where: { id, user_id: userId }
         })
-        console.log(`Ahorro encontrado ${userSaving.total_saving}`)
 
         if (!userSaving) return res.status(404).json({ message: 'Plan de ahorro no encontrado' })
         
@@ -124,6 +125,29 @@ export const updateSavingStatus = async (req, res) => {
         } else {
             return res.status(500).json('No se pudo marcar el día como ahorrado')
         }
+    } catch (error) {
+        return res.status(500).json(error)
+    }
+}
+
+export const resetSavingPlan = async (req, res) => {
+    const userId = req.user.id
+    const id = req.params.id
+
+    try {
+        const userSaving = await UserSaving.findOne({
+            where: { id, user_id: userId }
+        })
+
+        if (!userSaving) return res.status(404).json({ message: 'Plan de ahorro no encontrado' })
+        
+        const savings = userSaving.savings
+        const currentDate = new Date()
+
+        return res.status(200).json({
+            savingUpdated
+        })
+
     } catch (error) {
         return res.status(500).json(error)
     }

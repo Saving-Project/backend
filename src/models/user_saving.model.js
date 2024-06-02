@@ -1,7 +1,6 @@
 import { DataTypes } from 'sequelize'
 import { sequelize } from '../database/database.js'
 import { User } from './user.model.js'
-import { SavingPlan } from './saving_day.model.js'
 
 export const UserSaving = sequelize.define('user_savings', {
     id: {
@@ -20,6 +19,10 @@ export const UserSaving = sequelize.define('user_savings', {
     savings: {
         type: DataTypes.JSONB,
         allowNull: false
+    },
+    description: {
+        type: DataTypes.STRING,
+        allowNull: true
     },
     total_saving: {
         type: DataTypes.BIGINT,
