@@ -141,8 +141,27 @@ export const resetSavingPlan = async (req, res) => {
 
         if (!userSaving) return res.status(404).json({ message: 'Plan de ahorro no encontrado' })
         
-        const savings = userSaving.savings
-        const currentDate = new Date()
+        const startDate = new Date()
+
+        const savingDays = await SavingPlan.findAll({
+            where: {
+                day: {
+                    [Op.between]: [1, 200]
+                }
+            },
+            order: [['day', 'ASC']]
+        })
+        const savings = savingDays.map((day, index) => ({
+            saving_day_id: day.id,
+            saved: false,
+            date: new Date(startDate.getTime() + index * 24 * 60 * 60 * 1000),
+            enabled: index === 0
+        }))
+
+        const savingUpdated = await userSaving.update({
+            total_saving: 0,
+            savings
+        })
 
         return res.status(200).json({
             savingUpdated
