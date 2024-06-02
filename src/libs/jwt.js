@@ -7,8 +7,7 @@ export const createAccessToken = user => {
     const payload = {
         id: user.id,
         name: user.name,
-        email: user.email,
-        saving: user.saving
+        email: user.email
     }
 
     return new Promise((resolve, reject) => {

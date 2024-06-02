@@ -52,10 +52,6 @@ export const User = sequelize.define('users', {
                 msg: 'La contraseña es obligatoria'
             }
         }
-    },
-    saving: {
-        type: DataTypes.BIGINT,
-        defaultValue: 0
     }
 }, {
     timestamps: false
