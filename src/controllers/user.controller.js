@@ -1,7 +1,6 @@
 import { createAccessToken } from '../libs/jwt.js'
 import { User } from '../models/user.model.js'
 import bcrypt from 'bcryptjs'
-import { UserSaving } from '../models/user_saving.model.js'
 
 export const register = async (req, res) => {
     const {
@@ -74,21 +73,5 @@ export const getInfo = async (req, res) => {
         return res.status(200).json(user)
     } catch (error) {
         return res.status(500).json({ message: error.message })
-    }
-}
-
-export const getSavings = async (req, res) => {
-    const userId = req.user.id
-
-    try {
-        const userSavings = await UserSaving.findAll({
-            where: { user_id: userId}
-        })
-
-        if (!userSavings.length) return res.status(404).json({ message: 'No se encontraron planes de ahorro' })
-        
-        res.status(200).json(userSavings)
-    } catch (error) {
-        return res.status(500).json(error)
     }
 }

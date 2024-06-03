@@ -24,6 +24,18 @@ export const DayPlan = sequelize.define('day_plans', {
             model: 'saving_days',
             key: 'id'
         }
+    },
+    saved: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    enabled: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    date: {
+        type: DataTypes.DATEONLY,
+        unique: true
     }
 }, {
     timestamps: false
