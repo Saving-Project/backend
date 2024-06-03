@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize'
 import { sequelize } from '../database/database.js'
 
-export const SavingPlan = sequelize.define('saving_days', {
+export const SavingDay = sequelize.define('saving_days', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
