@@ -32,6 +32,7 @@ export const createSavingsPlan = async (req, res) => {
             daysAsigned
         })
     } catch (error) {
-
+        console.error(error)
+        return res.status(500).json(error)
     }
 }
