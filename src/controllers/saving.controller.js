@@ -119,7 +119,7 @@ export const markDayAsSaved = async (req, res) => {
 
         try {
             dayPlan.saved = true
-            const updateDay = await dayPlan.save({ transaction })
+            await dayPlan.save({ transaction })
 
             plan.total_saving = parseInt(plan.total_saving) + dayPlan.saving_day.amount
             await plan.save({ transaction })
@@ -128,7 +128,7 @@ export const markDayAsSaved = async (req, res) => {
 
             if (nextDayPlan && nextDayPlan.date === new Date().toISOString().split('T')[0]) {
                 nextDayPlan.enabled = true
-                const nextDay = await nextDayPlan.save({ transaction })
+                await nextDayPlan.save({ transaction })
             }
 
             await transaction.commit()
@@ -143,4 +143,137 @@ export const markDayAsSaved = async (req, res) => {
         console.error(error)
         return res.status(500).json(error)
     }
+}
+
+export const resetPlan = async (req, res) => {
+    const { id } = req.params
+    const user_id = req.user.id
+
+    try {
+        const plan = await Plan.findOne({
+            where: {
+                id,
+                user_id
+            },
+            include: [{
+                model: DayPlan,
+                include: [SavingDay],
+                order: [['id', 'ASC']]
+            }]
+        })
+
+        if (!plan) return res.status(404).json({ message: 'Plan no encontrado' })
+        
+        const transaction = await sequelize.transaction()
+
+        try {
+            const currentDate = new Date()
+            let newDate = new Date(currentDate)
+
+            const dayPlans = plan.day_plans.sort((a, b) => a.id - b.id)
+
+            for (let i = 0; i < dayPlans.length; i++) {
+                const dayPlan = plan.day_plans[i]
+                dayPlan.saved = false
+                dayPlan.enabled = i === 0
+                dayPlan.date = new Date(newDate)
+
+                await dayPlan.save({ transaction })
+
+                newDate.setDate(newDate.getDate() + 1)
+            }
+
+            plan.total_saving = 0
+            await plan.save({ transaction })
+
+            await transaction.commit()
+
+            res.status(200).json({
+                message: 'Plan reiniciado con éxito',
+                plan
+            })
+        } catch (error) {
+            await transaction.rollback()
+            console.error('Error reiniciando el plan: ', error)
+            res.status(500).json({ message: 'Internal server error' })
+        }
+    } catch (error) {
+        return res.status(500).json(error)
+    }
+}
+
+export const deletePlan = async (req, res) => {
+    const { id } = req.params
+    const user_id = req.user.id
+
+    try {
+        const plan = await Plan.findOne({
+            where: {
+                id,
+                user_id
+            },
+            include: [{
+                model: DayPlan,
+                include: [SavingDay]
+            }]
+        })
+
+        if (!plan) return res.status(404).json({ message: 'Plan no encontrado' })
+        
+        const transaction = await sequelize.transaction()
+
+        try {
+            await DayPlan.destroy({
+                where: {
+                    plan_id: id
+                },
+                transaction
+            })
+
+            await plan.destroy({ transaction })
+
+            await transaction.commit()
+
+            res.status(200).json({ message: 'Plan eliminado con éxito' })
+        } catch (error) {
+            await transaction.rollback()
+            console.error('Error eliminando el plan: ', error)
+            res.status(500).json({ message: 'Internal server error' })
+        }
+    } catch (error) {
+        return res.status(500).json(error)
+    }
+}
+
+export const completePlan = async (req, res) => {
+    const { id } = req.params
+    const user_id = req.user.id
+
+    try {
+        const plan = await Plan.findOne({
+            where: {
+                id,
+                user_id
+            },
+            include: [
+                {
+                    model: DayPlan,
+                    include: [SavingDay]
+                }
+            ]
+        })
+        
+        if (!plan) return res.status(404).json({ message: 'Plan no encontrado' })
+        
+        if (plan.total_saving >= 1000000) {
+            plan.completed = true
+            await plan.save()
+            res.status(200).json({
+                message: 'Plan completado con éxito',
+                plan
+            })
+        }
+    } catch (error) {
+        return res.status(500).json(error)
+    } 
 }

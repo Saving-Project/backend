@@ -23,6 +23,10 @@ export const Plan = sequelize.define('plans', {
     total_saving: {
         type: DataTypes.BIGINT,
         defaultValue: 0
+    },
+    completed: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
 }, {
     timestamps: false
