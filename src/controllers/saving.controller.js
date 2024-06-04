@@ -65,3 +65,20 @@ export const getPlan = async (req, res) => {
         return res.status(500).json(error)
     }
 }
+
+export const getPlans = async (req, res) => {
+    const user_id = req.user.id
+
+    try {
+        const plans = await Plan.findAll({
+            where: { user_id }
+        })
+
+        if (!plans) return res.status(404).json({ message: 'Planes no encontrados' })
+        
+        return res.status(200).json(plans)
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json(error)
+    }
+}
