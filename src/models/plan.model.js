@@ -27,6 +27,12 @@ export const Plan = sequelize.define('plans', {
     completed: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
+    },
+    starts_in: {
+        type: DataTypes.DATEONLY,
+    },
+    ends_in: {
+        type: DataTypes.DATEONLY
     }
 }, {
     timestamps: false
