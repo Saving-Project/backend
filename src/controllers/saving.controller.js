@@ -8,12 +8,17 @@ export const createSavingsPlan = async (req, res) => {
     const { description } = req.body || ''
     
     try {
+        const today = new Date()
+        const startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+        const endDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 199)
+
         const newPlan = await Plan.create({
             user_id,
-            description
+            description,
+            starts_in: startDate,
+            ends_in: endDate
         })
 
-        const today = new Date()
         let dayPlansData = []
 
         for (let i = 0; i < 200; i++) {
@@ -184,6 +189,8 @@ export const resetPlan = async (req, res) => {
             }
 
             plan.total_saving = 0
+            plan.starts_in = new Date(currentDate)
+            plan.ends_in = new Date(newDate.getFullYear(), newDate.getMonth(), newDate.getDate() - 1)
             await plan.save({ transaction })
 
             await transaction.commit()
