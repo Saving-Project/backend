@@ -2,8 +2,9 @@ import app from './app.js'
 import { sequelize } from './database/database.js'
 import { data } from './config.js'
 
+import './models/day_plan.model.js'
+import './models/plan.model.js'
 import './models/saving_day.model.js'
-import './models/user_saving.model.js'
 import './models/user.model.js'
 
 const port = data.port
