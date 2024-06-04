@@ -44,4 +44,4 @@ Plan.hasMany(DayPlan, { foreignKey: 'plan_id' })
 DayPlan.belongsTo(Plan, { foreignKey: 'plan_id' })
 
 SavingDay.hasMany(DayPlan, { foreignKey: 'saving_day_id' })
-DayPlan.belongsTo(Plan, { foreignKey: 'saving_day_id' })
+DayPlan.belongsTo(SavingDay, { foreignKey: 'saving_day_id' })

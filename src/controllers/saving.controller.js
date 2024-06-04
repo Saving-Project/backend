@@ -1,5 +1,6 @@
 import { Plan } from '../models/plan.model.js'
 import { DayPlan } from '../models/day_plan.model.js'
+import { SavingDay } from '../models/saving_day.model.js'
 
 export const createSavingsPlan = async (req, res) => {
     const user_id = req.user.id
@@ -31,6 +32,34 @@ export const createSavingsPlan = async (req, res) => {
             newPlan,
             daysAsigned
         })
+    } catch (error) {
+        return res.status(500).json(error)
+    }
+}
+
+export const getPlan = async (req, res) => {
+    const user_id = req.user.id
+    const { id } = req.params
+
+    try {
+        const plan = await Plan.findOne({
+            where: {
+                id,
+                user_id
+            },
+            include: [{
+                model: DayPlan,
+                include: [{
+                    model: SavingDay,
+                    attributes: ['day', 'amount']
+                }],
+                order: [['date', 'ASC']]
+            }]
+        })
+
+        if (!plan) return res.status(404).json({ message: 'Plan no encontrado' })
+        
+        return res.status(200).json(plan)
     } catch (error) {
         console.error(error)
         return res.status(500).json(error)
