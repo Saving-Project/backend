@@ -11,18 +11,14 @@ export const register = async (req, res) => {
     try {
         if (password.length < 8 || password.length > 20) {
             return res.status(400).json({
-                error: {
-                    message: 'La contraseña debe tener entre 8 y 20 caracteres'
-                }
+                error: ['La contraseña debe tener entre 8 y 20 caracteres']
             })
         }
         
         const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).+$/
         if (!passwordRegex.test(password)) {
             return res.status(400).json({
-                error: {
-                    message: 'La contraseña debe contener al menos una letra y un número'
-                }
+                error: ['La contraseña debe contener al menos una letra y un número']
             })
         }
 
