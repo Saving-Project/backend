@@ -114,30 +114,37 @@ export const markDayAsSaved = async (req, res) => {
         const dayPlan = plan.day_plans.find(dp => dp.id === parseInt(day))
         if (!dayPlan) return res.status(400).json({ message: 'DayPlan not found' })
         
-        if (dayPlan.saved) return res.status(400).json({ message: 'Este día ya fue guardado' })
-
         const now = new Date()
         const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
         const currentDate = localDate.toISOString().split('T')[0]
+        console.log(currentDate, dayPlan.date)
 
-        console.log(localDate, currentDate, dayPlan.date)
-
-        if (dayPlan.date !== currentDate) {
-            return res.status(400).json({ message: 'No puedes guardar este día todavía' });
+        if (dayPlan.date > currentDate) {
+            return res.status(400).json({ message: 'No puedes guardar este día!' })
         }
+        
+        if (dayPlan.saved) return res.status(400).json({ message: 'Este día ya fue guardado' })
+            
+        const previousDaysNotSaved = plan.day_plans.some(dp => dp.date < dayPlan.date && !dp.saved)
+        if (previousDaysNotSaved) {
+            return res.status(400).json({ message: 'No puedes guardar este día hasta que los días anteriores estén guardados! ' })
+        }
+
+        if (!dayPlan.enabled) return res.status(400).json({ message: 'Este día no está habilitado' })
         
         const transaction = await sequelize.transaction()
 
         try {
             dayPlan.saved = true
+            dayPlan.enabled = false
             await dayPlan.save({ transaction })
 
             plan.total_saving = parseInt(plan.total_saving) + dayPlan.saving_day.amount
             await plan.save({ transaction })
             
-            const nextDayPlan = plan.day_plans.find(dp => dp.date > dayPlan.date)
+            const nextDayPlan = plan.day_plans.find(dp => dp.date > dayPlan.date && !dp.saved)
 
-            if (nextDayPlan && nextDayPlan.date === new Date().toISOString().split('T')[0]) {
+            if (nextDayPlan) {
                 nextDayPlan.enabled = true
                 await nextDayPlan.save({ transaction })
             }
