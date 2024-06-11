@@ -8,18 +8,16 @@ export const register = async (req, res) => {
         email,
         password
     } = req.body
+    const errors = []
+        
     try {
         if (password.length < 8 || password.length > 20) {
-            return res.status(400).json({
-                error: ['La contraseña debe tener entre 8 y 20 caracteres']
-            })
+            errors.push('La contraseña debe tener entre 8 y 20 caracteres')
         }
         
         const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).+$/
         if (!passwordRegex.test(password)) {
-            return res.status(400).json({
-                error: ['La contraseña debe contener al menos una letra y un número']
-            })
+            errors.push('La contraseña debe contener al menos una letra y un número')
         }
 
         const pwdHash = await bcrypt.hash(password, 10)
@@ -32,17 +30,24 @@ export const register = async (req, res) => {
     } catch (error) {
         if (error.name === 'SequelizeValidationError') {
             const errs = error.errors.map(err => err.message)
-            return res.status(400).json({ errors: errs})
+            errors.push(...errs)
         } else {
             return res.status(500).json(error)
         }
+
+        return res.status(400).json({ errors })
     }
 }
 
 export const login = async (req, res) => {
     const { email, password } = req.body
+    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 
     try {
+        if (!email || !password) return res.status(400).json({ message: 'Campos vacíos' })
+
+        if (!regex.test(email)) return res.status(400).json({ message: 'Formato de correo no válido' })
+        
         const user = await User.findOne({ where: { email } })
         if (!user) return res.status(404).json({ message: 'Usuario no encontrado' })
         

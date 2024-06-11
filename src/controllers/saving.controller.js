@@ -77,7 +77,8 @@ export const getPlans = async (req, res) => {
 
     try {
         const plans = await Plan.findAll({
-            where: { user_id }
+            where: { user_id },
+            order: [['id', 'ASC']]
         })
 
         if (!plans) return res.status(404).json({ message: 'Planes no encontrados' })
@@ -115,7 +116,12 @@ export const markDayAsSaved = async (req, res) => {
         
         if (dayPlan.saved) return res.status(400).json({ message: 'Este día ya fue guardado' })
 
-        const currentDate = new Date().toISOString().split('T')[0];
+        const now = new Date()
+        const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        const currentDate = localDate.toISOString().split('T')[0]
+
+        console.log(localDate, currentDate, dayPlan.date)
+
         if (dayPlan.date !== currentDate) {
             return res.status(400).json({ message: 'No puedes guardar este día todavía' });
         }
